@@ -17,6 +17,23 @@ curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records
 Refreshed every day at 07:00 UTC. Typically **800-900 postings from ~46 job
 boards** across ~70 companies — see `/records/meta` for the live count.
 
+### Daily history
+
+`latest` is overwritten on every run, so each day is also archived under its own
+key. Job-market history cannot be collected retroactively — if it is not captured
+on the day, it is gone.
+
+```bash
+# what days exist (first, last, count, and the full list)
+curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records/history-index
+
+# one specific day, same schema as /latest
+curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records/history-2026-08-19
+```
+
+Keys are `history-YYYY-MM-DD` (UTC). Read `history-index` first rather than
+guessing dates — a day the run failed simply will not be there.
+
 ## Why this exists
 
 Every major ATS publishes its job board as a public JSON endpoint. But each one
