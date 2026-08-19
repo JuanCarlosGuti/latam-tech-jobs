@@ -1,7 +1,7 @@
 # LATAM-eligible tech jobs — open daily dataset
 
 A free, daily-refreshed dataset of open tech roles that a candidate **based in
-Latin America** could actually take, normalized into one schema across five
+Latin America** could actually take, normalized into one schema across six
 applicant tracking systems.
 
 No token. No signup. No login. Two URLs:
@@ -14,8 +14,8 @@ curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records
 curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records/meta
 ```
 
-Refreshed every day at 07:00 UTC. Current snapshot: **566 postings from 44 job
-boards**.
+Refreshed every day at 07:00 UTC. Typically **800-900 postings from ~46 job
+boards** across ~70 companies — see `/records/meta` for the live count.
 
 ## Why this exists
 
@@ -39,7 +39,7 @@ One object per posting.
 | Field | Type | Notes |
 |---|---|---|
 | `id` | string | `{source}:{slug}:{nativeId}` — stable across runs, safe to upsert on |
-| `source` | string | `greenhouse` \| `lever` \| `ashby` \| `workable` \| `smartrecruiters` \| `recruitee` \| `workday` |
+| `source` | string | `greenhouse` \| `lever` \| `ashby` \| `workable` \| `smartrecruiters` \| `recruitee` \| `workday` \| `eightfold` |
 | `companySlug` | string | the board identifier on that ATS — **the field to join on** |
 | `companyName` | string | display name. See the caveat below |
 | `title` | string | |
@@ -78,14 +78,15 @@ so they sort against each other. `rawText` is kept so you can audit the parse.
 
 ## Caveats — read these before you trust a column
 
-**1. Only 8.7% of postings have a salary, and that is a fact about the market,
+**1. Only ~6% of postings have a salary, and that is a fact about the market,
 not about the parser.**
 
 | ATS | Share of rows | Rows with salary |
 |---|---|---|
-| Greenhouse | 70% | 3.5% |
-| Ashby | 22% | 16.7% |
-| Lever | 7% | 35.9% |
+| Greenhouse | 46% | 3.5% |
+| Eightfold | 35% | ~0% |
+| Ashby | 14% | 16.7% |
+| Lever | 5% | 35.9% |
 
 US pay-transparency laws force employers to publish ranges. Most Latin American
 postings simply don't include one, and a parser cannot extract a number that was
@@ -95,7 +96,7 @@ never has a number in it.
 **2. `companyName` is authoritative for some sources and derived for others.**
 
 Greenhouse, Workable, SmartRecruiters and Recruitee return the employer's
-display name in their API. **Ashby, Lever and Workday do not expose it anywhere**
+display name in their API. **Ashby, Lever, Workday and Eightfold do not expose it anywhere**
 — not at the top level, not on individual postings. For those three the name is
 derived from the board slug (`nubank` → `Nubank`), so casing on multi-word
 brands will sometimes be wrong.
@@ -147,6 +148,7 @@ account:
 | SmartRecruiters | `api.smartrecruiters.com/v1/companies/{slug}/postings` |
 | Recruitee | `{slug}.recruitee.com/api/offers/` |
 | Workday | `POST {host}/wday/cxs/{tenant}/{site}/jobs` |
+| Eightfold | `{tenant}.eightfold.ai/api/pcsx/search?domain={domain}` |
 
 Nothing here requires logging in, and nothing that requires logging in will ever
 be added. No personal data is collected or published — job postings only.
@@ -164,6 +166,10 @@ A few things that cost me time and aren't documented anywhere:
   discovery here.
 - **Ashby hides compensation behind a query parameter.** Without
   `?includeCompensation=true` the field is absent entirely — not `null`, absent.
+- **Eightfold’s obvious endpoint lies about being closed.** `/api/apply/v2/jobs`
+  answers `403 Not authorized for PCSX`; the one the career site itself calls,
+  `/api/pcsx/search`, is fully open. And its `num` silently caps at 10. Not every
+  tenant allows it — some answer 403 to any non-browser request.
 - **A company's domain is not its ATS slug.** `datadoghq.com` is `datadog` on
   Greenhouse; `joinhandshake.com` is `handshake` on Ashby.
 
