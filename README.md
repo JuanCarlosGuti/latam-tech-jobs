@@ -15,7 +15,8 @@ curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records
 ```
 
 Refreshed every day at 07:00 UTC. Typically **800-900 postings from ~46 job
-boards** across ~70 companies — see `/records/meta` for the live count.
+boards**. Around 70 companies are queried; on a given day roughly 30 of them
+have LATAM-eligible roles open — see `/records/meta` for the live count.
 
 ### Daily history
 
@@ -98,23 +99,26 @@ so they sort against each other. `rawText` is kept so you can audit the parse.
 **1. Only ~6% of postings have a salary, and that is a fact about the market,
 not about the parser.**
 
+Measured on the 2026-08-19 snapshot (855 postings):
+
 | ATS | Share of rows | Rows with salary |
 |---|---|---|
-| Greenhouse | 46% | 3.5% |
-| Eightfold | 35% | ~0% |
-| Ashby | 14% | 16.7% |
-| Lever | 5% | 35.9% |
+| Greenhouse | 45% | 4.4% |
+| Eightfold | 35% | 0.0% |
+| Ashby | 14% | 15.6% |
+| Lever | 5% | 37.5% |
+| Workable | 1% | 20.0% |
 
 US pay-transparency laws force employers to publish ranges. Most Latin American
 postings simply don't include one, and a parser cannot extract a number that was
-never written. The source carrying 70% of the volume is the one that almost
-never has a number in it.
+never written. The two sources carrying 80% of the volume are the two that
+almost never have a number in them.
 
 **2. `companyName` is authoritative for some sources and derived for others.**
 
 Greenhouse, Workable, SmartRecruiters and Recruitee return the employer's
 display name in their API. **Ashby, Lever, Workday and Eightfold do not expose it anywhere**
-— not at the top level, not on individual postings. For those three the name is
+— not at the top level, not on individual postings. For those four the name is
 derived from the board slug (`nubank` → `Nubank`), so casing on multi-word
 brands will sometimes be wrong.
 
