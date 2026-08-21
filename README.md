@@ -14,7 +14,7 @@ curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records
 curl https://api.apify.com/v2/key-value-stores/crearcode~latam-tech-jobs/records/meta
 ```
 
-Refreshed every day at 07:00 UTC. Typically **800-900 postings from ~46 job
+Refreshed every day at 07:00 UTC. Typically **1,400-1,500 postings from ~45 job
 boards**. Around 70 companies are queried; on a given day roughly 30 of them
 have LATAM-eligible roles open — see `/records/meta` for the live count.
 
@@ -70,9 +70,9 @@ One object per posting.
 | `employmentType` | string | **`null` on 71%** — most boards don't set it |
 | `postedAt` | string | ISO 8601 |
 | `updatedAt` | string | ISO 8601. `null` on 30% |
-| `salary` | object | **`null` on 91%.** Read the caveat, it matters |
-| `language` | string | detected language of the description |
-| `description` | string | plain text, truncated to 600 chars in this dataset |
+| `salary` | object | **`null` on ~96%.** Read the caveats, they matter |
+| `language` | string | detected language of the description. `null` on Eightfold rows |
+| `description` | string | plain text, truncated to 600 chars. **`null` on Eightfold rows** (caveat 4) |
 | `scrapedAt` | string | ISO 8601 capture timestamp |
 
 ### `salary`
@@ -96,18 +96,18 @@ so they sort against each other. `rawText` is kept so you can audit the parse.
 
 ## Caveats — read these before you trust a column
 
-**1. Only ~6% of postings have a salary, and that is a fact about the market,
+**1. Only ~4% of postings have a salary, and that is a fact about the market,
 not about the parser.**
 
-Measured on the 2026-08-19 snapshot (855 postings):
+Measured on the 2026-08-21 snapshot (1,446 postings):
 
 | ATS | Share of rows | Rows with salary |
 |---|---|---|
-| Greenhouse | 45% | 4.4% |
-| Eightfold | 35% | 0.0% |
-| Ashby | 14% | 15.6% |
-| Lever | 5% | 37.5% |
-| Workable | 1% | 20.0% |
+| Eightfold | 62% | 0.0% |
+| Greenhouse | 26% | 4.5% |
+| Ashby | 8% | 17.4% |
+| Lever | 3% | 40.0% |
+| Workable | <1% | 16.7% |
 
 US pay-transparency laws force employers to publish ranges. Most Latin American
 postings simply don't include one, and a parser cannot extract a number that was
@@ -130,7 +130,15 @@ value.
 No ATS has a reliable structured field for either. They're derived from location
 strings and description text. They're good, not perfect.
 
-**4. This is a curated sample, not the whole market.**
+**4. Eightfold rows carry no description, salary or language.**
+
+Eightfold rate-limits its per-posting detail endpoint (HTTP 429 after ~300
+calls per run), so those rows are built from the listing alone — title,
+locations, ISO country codes, work mode and URL — and `description`,
+`salary` and `language` are `null`. A complete board without descriptions
+beats a third of a board with them.
+
+**5. This is a curated sample, not the whole market.**
 
 It runs against ~70 companies known to hire in or from Latin America. It is not
 an exhaustive index of every open role in the region, and it never claims to be.
